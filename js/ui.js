@@ -491,24 +491,27 @@ function playFromHistory(url, title, episodeIndex, playbackPosition = 0) {
         // 构造带播放进度参数的URL
         const positionParam = `&position=${Math.floor(playbackPosition || 0)}`;
         
-        if (url.includes('?')) {
-            // URL已有参数，添加索引和位置参数
+        if (url.includes('?')) {            // URL已有参数，添加索引和位置参数
             const playUrl = new URL(url);
             if (!playUrl.searchParams.has('index') && episodeIndex > 0) {
                 playUrl.searchParams.set('index', episodeIndex);
             }
             playUrl.searchParams.set('position', Math.floor(playbackPosition || 0).toString());
-            showVideoPlayer(playUrl.toString());
-        } else {
-            // 原始URL，构造player页面链接
-            const playerUrl = `player.html?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&index=${episodeIndex}&position=${Math.floor(playbackPosition || 0)}`;
-            showVideoPlayer(playerUrl);
+            
+            // 使用新的URL格式
+            const cleanTitle = title.replace(/[^\w\u4e00-\u9fa5]/g, '_');
+            const watchUrl = `watch/${encodeURIComponent(cleanTitle)}${playUrl.search}`;
+            showVideoPlayer(watchUrl);
+        } else {            // 原始URL，构造player页面链接，使用新的URL结构
+            const cleanTitle = title.replace(/[^\w\u4e00-\u9fa5]/g, '_');
+            const watchUrl = `watch/${encodeURIComponent(cleanTitle)}?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&index=${episodeIndex}&position=${Math.floor(playbackPosition || 0)}`;
+            showVideoPlayer(watchUrl);
         }
     } catch (e) {
-        console.error('从历史记录播放失败:', e);
-        // 回退到原始简单URL
-        const simpleUrl = `player.html?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&index=${episodeIndex}`;
-        showVideoPlayer(simpleUrl);
+        console.error('从历史记录播放失败:', e);        // 回退到原始简单URL
+        const cleanTitle = title.replace(/[^\w\u4e00-\u9fa5]/g, '_');
+        const watchUrl = `watch/${encodeURIComponent(cleanTitle)}?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&index=${episodeIndex}`;
+        showVideoPlayer(watchUrl);
     }
 }
 

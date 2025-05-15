@@ -378,39 +378,49 @@
     <script src="js/password.js"></script>
     <script src="js/ui.js"></script>
 
-    <script>
-        // 创建全局环境变量对象
-        window.__ENV__ = window.__ENV__ || {};
+    <script>        // 创建全局环境变量对象        window.__ENV__ = window.__ENV__ || {};
         
         // 注入服务器端环境变量 (将由服务器端替换)
         // PASSWORD 变量将在这里被服务器端注入
-        window.__ENV__.PASSWORD = "{{PASSWORD}}";
-
+        window.__ENV__.PASSWORD = "{{PASSWORD}}";        
+        
         // 改进返回上一页功能
         function goBack() {
-            // 检查是否是从搜索页面进入的播放器
-            const referrer = document.referrer;
+            // 保存当前播放进度，以便返回后可以继续播放
+            if (dp && dp.video) {
+                try {
+                    saveCurrentProgress();
+                } catch (e) {
+                    console.error('保存播放进度失败:', e);
+                }
+            }
             
-            // 检查 referrer 是否包含搜索参数
+            // 首先检查URL参数中是否有referrer
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlReferrer = urlParams.get('referrer');
+            
+            if (urlReferrer) {
+                // 如果URL参数中有referrer，优先使用它
+                window.location.href = decodeURIComponent(urlReferrer);
+                return;
+            }
+            
+            // 检查localStorage中是否有lastSearchPage
+            const lastSearchPage = localStorage.getItem('lastSearchPage');
+            if (lastSearchPage) {
+                window.location.href = lastSearchPage;
+                return;
+            }
+            
+            // 尝试使用document.referrer (如果是从搜索页面进入的播放器)
+            const referrer = document.referrer;
             if (referrer && (referrer.includes('/s=') || referrer.includes('?s='))) {
-                // 如果是从搜索页面来的，返回到搜索页面
                 window.location.href = referrer;
                 return;
             }
             
-            // 如果是在iframe中打开的，尝试关闭iframe
-            if (window.self !== window.top) {
-                try {
-                    // 尝试调用父窗口的关闭播放器函数
-                    window.parent.closeVideoPlayer && window.parent.closeVideoPlayer();
-                    return;
-                } catch (e) {
-                    console.error('调用父窗口closeVideoPlayer失败:', e);
-                }
-            }
-            
-            // 默认行为：返回上一页
-            window.history.back();
+            // 最后的兜底：返回首页
+            window.location.href = '/';
         }
 
         // =================================
@@ -449,16 +459,13 @@
             document.getElementById('loading').style.display = 'block';
 
             initializePageContent();
-        });
-
-        // 判断是否再框架中打开
+        });        // 判断是否再框架中打开
         function inIframe() {
             try {
-                // 如果当前窗口的顶层窗口不是自身，说明在框架中
-                return window.self !== window.top;
+                // 重构后我们不再使用iframe，但保留此函数以兼容旧代码
+                return false;
             } catch (e) {
-                // 跨域访问会抛出错误，此时也说明在框架中
-                return true;
+                return false;
             }
         }
         // 如果播放器不是在框架中打开，则隐藏上一页按钮
@@ -1739,12 +1746,10 @@
             icon.innerHTML = controlsLocked
                 ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d=\"M12 15v2m0-8V7a4 4 0 00-8 0v2m8 0H4v8h16v-8H6v-6z\"/>'
                 : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d=\"M15 11V7a3 3 0 00-6 0v4m-3 4h12v6H6v-6z\"/>';
-        }
-
-        // 返回上一页
+        }        // 返回上一页
         function goBack() {
-            const parentWindow = window.parent;
-            parentWindow.closeVideoPlayer();
+            // 执行主goBack函数定义的逻辑
+            window.location.href = '/';
         }
     </script>
 </body>

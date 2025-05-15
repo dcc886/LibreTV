@@ -2,9 +2,37 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0; url=player.html">
-    <title>重定向到播放器</title>
+    <title>正在加载视频 - LibreTV</title>
     <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="./image/retrotv_5520.png">
+    <link rel="apple-touch-icon" href="./image/retrotv_5520.png">
+    <style>
+        body {
+            background-color: #0f1622;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .loading-container {
+            text-align: center;
+        }
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
     <script>
         // 获取当前URL的参数，并将它们传递给player.html
         window.onload = function() {
@@ -19,27 +47,18 @@
                 playerUrl += "?" + currentParams.toString();
             }
             
-            // 获取来源URL (如果存在)
-            const referrer = document.referrer;
+            // 保存当前完整 URL 到 localStorage
+            localStorage.setItem('currentFullPageUrl', window.location.href);
             
-            // 如果有referrer并且包含搜索参数，保存它以便返回
-            if (referrer && (referrer.includes('/s=') || referrer.includes('?s='))) {
-                // 如果已经有参数，添加&，否则添加?
-                playerUrl += playerUrl.includes('?') ? '&' : '?';
-                playerUrl += 'referrer=' + encodeURIComponent(referrer);
-                
-                // 同时保存在localStorage中，作为备用
-                localStorage.setItem('lastSearchPage', referrer);
-            }
-            
-            // 重定向到播放器页面
+            // 直接重定向到播放器页面
             window.location.href = playerUrl;
         };
     </script>
 </head>
 <body>
-    <div style="text-align: center; padding-top: 100px;">
-        正在重定向到播放器...
+    <div class="loading-container">
+        <div class="loading-spinner"></div>
+        <div>正在加载视频播放器...</div>
     </div>
 </body>
 </html>

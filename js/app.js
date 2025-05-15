@@ -1042,28 +1042,20 @@ function playVideo(url, vod_name, sourceCode, episodeIndex = 0) {
     if (typeof addToViewingHistory === 'function') {
         addToViewingHistory(videoInfo);
     }
-    
-    // 构建播放页面URL，传递必要参数
-    const playerUrl = `player.html?url=${encodeURIComponent(url)}&title=${encodeURIComponent(videoTitle)}&index=${episodeIndex}&source=${encodeURIComponent(sourceName)}&source_code=${encodeURIComponent(sourceCode)}`;
-    showVideoPlayer(playerUrl);
+      // 构建播放页面URL，传递必要参数 - 使用watch/视频ID的URL结构
+    const cleanVideoTitle = videoTitle.replace(/[^\w\u4e00-\u9fa5]/g, '_'); // 移除特殊字符，只保留字母、数字、中文和下划线
+    const watchUrl = `watch/${encodeURIComponent(cleanVideoTitle)}?url=${encodeURIComponent(url)}&title=${encodeURIComponent(videoTitle)}&index=${episodeIndex}&source=${encodeURIComponent(sourceName)}&source_code=${encodeURIComponent(sourceCode)}`;
+    showVideoPlayer(watchUrl);
 }
 
 // 弹出播放器页面
 function showVideoPlayer(url) {
-    // 在打开播放器前，隐藏详情弹窗
-    const detailModal = document.getElementById('modal');
-    if (detailModal) {
-        detailModal.classList.add('hidden');
-    }
-    // 临时隐藏搜索结果和豆瓣区域，防止高度超出播放器而出现滚动条
-    document.getElementById('resultsArea').classList.add('hidden');
-    document.getElementById('doubanArea').classList.add('hidden');
-    // 在框架中打开播放页面
-    videoPlayerFrame = document.createElement('iframe');
-    videoPlayerFrame.id = 'VideoPlayerFrame';
-    videoPlayerFrame.className = 'fixed w-full h-screen z-40';
-    videoPlayerFrame.src = url;
-    document.body.appendChild(videoPlayerFrame);
+    // 保存当前的搜索页URL到localStorage，用于返回时使用
+    localStorage.setItem('lastSearchPage', window.location.href);
+    
+    // 使用window.location直接导航到播放页面，而不使用新窗口
+    // 这样可以保持浏览历史，方便返回
+    window.location.href = url;
 }
 
 // 关闭播放器页面
